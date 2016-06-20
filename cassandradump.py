@@ -230,22 +230,26 @@ def export_data(session):
                 keyspaces.append(keyspace)
 
     if args.keyspace is not None:
-        keyspaces = args.keyspace
+        if args.keyspace[0].find(',') != -1:
+            keyspaces = args.keyspace[0].split(',')
+        else:
+            keyspaces = args.keyspace
 
     if keyspaces is not None:
         for keyname in keyspaces:
-            keyspace = get_keyspace_or_fail(session, keyname)
+            if keyname.strip() != '':
+                keyspace = get_keyspace_or_fail(session, keyname)
 
-            if not args.no_create:
-                log_quiet('Exporting schema for keyspace ' + keyname + '\n')
-                f.write('DROP KEYSPACE IF EXISTS "' + keyname + '";\n')
-                f.write(keyspace.export_as_string() + '\n')
+                if not args.no_create:
+                    log_quiet('Exporting schema for keyspace ' + keyname + '\n')
+                    f.write('DROP KEYSPACE IF EXISTS "' + keyname + '";\n')
+                    f.write(keyspace.export_as_string() + '\n')
 
-            for tablename, tableval in keyspace.tables.iteritems():
-                if tableval.is_cql_compatible:
-                    if not args.no_insert:
-                        log_quiet('Exporting data for column family ' + keyname + '.' + tablename + '\n')
-                        table_to_cqlfile(session, keyname, tablename, None, tableval, f)
+                for tablename, tableval in keyspace.tables.iteritems():
+                    if tableval.is_cql_compatible:
+                        if not args.no_insert:
+                            log_quiet('Exporting data for column family ' + keyname + '.' + tablename + '\n')
+                            table_to_cqlfile(session, keyname, tablename, None, tableval, f)
 
     if args.cf is not None:
         for cf in args.cf:
