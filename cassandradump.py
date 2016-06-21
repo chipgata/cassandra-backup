@@ -61,6 +61,8 @@ def table_to_cqlfile(session, keyspace, tablename, flt, tableval, filep):
             return session.encoder.cql_encode_bytes
         elif typename.startswith('map'):
             return session.encoder.cql_encode_map_collection
+        elif typename.startswith('frozen'):
+            return session.encoder.cql_encode_map_collection
         elif typename.startswith('set'):
             return session.encoder.cql_encode_set_collection
         elif typename.startswith('list'):
